@@ -12,10 +12,9 @@ Contents
 
 ORFanDbFormat is used to format databases for use with ORFanFinder.
 If you are only looking to use one of the prepackaged databases,
-you likely do not need to deal with this much. Simply navigate to
-your build directory of ORFanFinder (the directory where you ran
-configure) and run 'make db'. Several databases will be made
-for you. Otherwise, instructions are below.
+you likely do not need to deal with this much. Simply download the 
+uniprot.hdb.gz file from orfanfinder.com. Otherwise, instructions 
+are below.
 
 ------------------------------------------------------------------
 

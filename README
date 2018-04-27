@@ -1,0 +1,200 @@
+		ORFanFinder
+            (c) Yin Lab, 2014
+
+Contents:
+  I.   Installation
+  II.  Input
+  III. Running
+  IV.  Output
+  V.  A Note on Using New Genomes
+
+=========================================================================
+
+	I. Installation
+
+Compiling ORFanFinder requires the g++ compiler and GNU make. All
+Unix style operating systems ship with g++ and make by default. Windows
+users should look into the Cgywin program to get g++ and GNU make.
+
+While in the ORFanFinder directory, run the 'make' command. This will create
+the ORFanFinder executable. Do the same in the ORFanDbFormat directory to 
+create the ORFanDbFormat executable. To make these programs availble
+system wide, copy both execuatables into a directory within your PATH 
+(usually /usr/bin, /bin, /usr/local/bin)
+
+------------------------------------------------------------------------
+
+	II. Input
+
+Several input files are required for ORFanFinder. The following 
+entries list the files required, a description, and a small example
+of the expected input.
+
+1. BLAST output
+
+	This is a file that was given as output from NCBI BLAST
+	in tabular format. The argument "-outfmt 6" or "-outfmt 7" for
+	blast+ will give data in this format.
+
+Data should look like:
+
+ATCG00500.1|PACid:19637947      ACCD_ARATH      99.80   488     1       0       1       488     1       488     0.0     1006
+ATCG00500.1|PACid:19637947      ACCD_CAPBU      96.31   488     14      1       1       488     1       484     0.0      967
+ATCG00500.1|PACid:19637947      ACCD_CRUWA      95.29   488     19      1       1       488     1       484     0.0      954
+
+
+2. ID file
+
+	This file contains a list of all of the gene IDs in the query
+	genome used in the BLAST.
+
+Data should look like:
+
+ATCG00500.1|PACid:19637947
+ATCG00510.1|PACid:19637948
+ATCG00280.1|PACid:19637949
+
+
+3. Nodes file
+
+	This file is a tab-delimited file that lists each rank's taxonomy
+	id, that rank's parent's id, and the name of the rank. This
+	information stems from NCBI's taxonomy database, but individual
+	files can be generated so long as they follow this format, and
+	as long as every rank included in the database BLASTed against 
+	is included. 
+
+Data should look like:
+
+1       1       no rank
+2       131567  superkingdom
+6       335928  genus
+7       6       species
+
+
+4. Database File
+
+	The database file is generated with the ORFanDbFormat tool
+	that is included in this package. The file is a binary file.
+	Several databases can be compiled alongside the program. See
+	Section I. and README.Format for further details.
+
+
+5. Names
+
+	The names file is an optional, tab-delimited file that
+	lists every taxonomy id in the database and its name. This file
+	is based off of one that comes from NCBI's taxonomy database,
+	but an individual one can be generated so long as they follow
+	this format, and as long as every rank included in the database
+	BLASTed against is included.
+
+Data should look like:
+
+1       root
+2       Bacteria
+6       Azorhizobium
+7       Azorhizobium caulinodans
+
+-------------------------------------------------------------------------
+
+	III. Running
+
+ORFanFinder has several arguments that must be passed in, as well as
+several options. For each of the file inputs, the data required has
+been explained above.
+
+	[-query blast_filename] Tabular BLAST output file name
+
+	[-id id_list_filename] List of all query genes
+
+	[-tax int_val] The taxonomy id of the query genome. For example, 
+if A. thaliana were being run, the argument would be 3702.
+
+	[-db database_file] Database file created by ORFDbFormat
+
+	[-nodes nodes_filename] The file is tab-delimited and gives each
+rank's taxonomy id, its parent's id
+
+	[-out out_filename] The name of the file to write output to.
+
+	<-names names_filename> This file is tab-delimited and give's
+each taxonomy id and its name. Optional. If passed, aditional output is
+given.
+
+	<-threads int_val> The number of worker threads to use. The total
+threads used will be 3 greater than this number. Optional, defaults to 1.
+
+
+Ex:
+	ORFanFinder -query Athaliana.bl -id Athaliana.id -tax 3702 \
+		-db nr.hdb -nodes nodes -threads 3 -out Athaliana.orf
+
+--------------------------------------------------------------------------
+
+	IV. Output
+
+Output from ORFanFinder is tab-delimited. With generic output, the file
+will look like so:
+
+gi|16127995|ref|NP_414542.1|    family ORFan
+gi|16127997|ref|NP_414544.1|    superkingdom ORFan
+gi|16127998|ref|NP_414545.1|    superkingdom ORFan
+
+The first column is the gene ID, the second column is the ORFan level
+of the gene.
+
+If the names argument was provided, aditional output will have been
+generated. Instead, output will look like so:
+
+
+gi|16127995|ref|NP_414542.1|    family ORFan - Enterobacteriaceae       [genus,2]Escherichia(Enterobacteriaceae),Shigella(Enterobacteriaceae),  [species,3]Escherichia coli(Escherichia),Shigella flexneri(Escherichia),Shigella sonnei(Shigella),      [subspecies,13](Escherichia coli),Escherichia coli O145:H28(Escherichia coli),Escherichia coli SE15(Escherichia coli),Escherichia coli IHE3034(Escherichia coli),Escherichia coli O103:H2(Escherichia coli),Escherichia coli W(Escherichia coli),Escherichia coli D6-113.11(Escherichia coli),Escherichia coli ETEC H10407(Escherichia coli),Escherichia coli BL21(DE3)(Escherichia coli),Escherichia coli ECC-1470(Escherichia coli),Escherichia coli O111:H-(Escherichia coli),Escherichia coli DH1(Escherichia coli),Escherichia coli B(Escherichia coli),
+
+The first column still gives the gene ID. The second column displays
+the ORFan level, but now also gives the name of that rank. The following
+column display extra information for each hit rank. The data looks like:
+
+[rankName,numGenesHit]hitGene(parentGene),hitGene(parentGene)...
+
+Inside the brackets are the name of the rank and the number of hits to
+that rank. Following it are each of the taxons that were hit in that rank.
+Inside the parentheses is the taxon that is the parent to that taxon. Each
+subsequent entry is separated by a comma.
+
+
+--------------------------------------------------------------------------
+
+	V.  A Note on Using New Genomes
+
+	By default, using genomes not in NCBI's Taxanomy database will not be recognized by ORFanFinder.
+This is likely to be the case when using newly sequenced genomes, although other circumstances can
+create this issue as well. This can be solved by using a custom nodes file as explained in
+section II.2. At the very minimum, the nodes file must contain all genomes in the database and all
+genomes that will be queried.
+
+	Oftentimes you will just need to run a new genome, and use the same database. In this case
+the best solution will like be to use a modified version of the included nodes file. For example,
+say that we wish to run Anabaena sp. WA113 with ORFanFinder. As it is not in Taxonomy, this will
+not work. The first step is to retrieve an identifier for this strain. If possible, it is best to
+use an NCBI taxonomy number. If one cannot be obtained, an arbitrary number may be used. The only
+requirement is that it is unique and does not conflict with another line in the file. If you use
+an arbitrary number, note that it could conflict with future NCBI numbers in Taxonomy. In this
+example we use the Taxonomy number 1710889. The next step is to find the parent. In this case
+we find Anabaena sp. in NCBI Taxonomy, with Taxonomy number 1167. If we were unable to find it
+we would reapeat these steps for the taxon above our query. Finally, we need to determine
+the taxon level. In this case we're dealing with a subspecies. Now that we have this information,
+we add it to the end of the nodes file, tab delimited.
+
+Eg:
+1710889	1167	subspecies
+
+	At this point you could run ORFanFinder on Anabaena sp. WA113 safely. Make certain
+to use this procedure on all necessary genomes in order to run ORFanFinder correctly.
+If creating a database, this needs to be done for every genome. Make sure that root is ID
+1 and has a parent of 1. Everything else can be identified however you want so long as it
+has a unique name and a valid parent.
+
+
+If you're trying to create the nodes file from a newer copy of the nodes.dmp, you can do so
+with:
+	sed 's/\t[|]\t/\t/g' nodes.dmp | cut -f1,2,3

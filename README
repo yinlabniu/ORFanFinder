@@ -23,7 +23,7 @@ system wide, copy both execuatables into a directory within your PATH
 (usually /usr/bin, /bin, /usr/local/bin)
 
 Note: Preformatted databases and taxonomy files, along with example outputs
-	are available at orfanfinder.com/download.
+	are available at cys.bios.niu.edu/orfanfinder/download.
 
 ------------------------------------------------------------------------
 
@@ -129,7 +129,7 @@ given.
 threads used will be 3 greater than this number. Optional, defaults to 1.
 
 Note: Preformatted databases and taxonomy files, along with example outputs
-	are available at orfanfinder.com/download.
+	are available at cys.bios.niu.edu/orfanfinder/download.
 
 Ex:
 	ORFanFinder -query Athaliana.bl -id Athaliana.id -tax 3702 \
